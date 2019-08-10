@@ -9,8 +9,14 @@ use think\Request;
 
 class Bill extends Controller
 {
-    public function index(){
-        return $this->fetch("/member/bill");
+    public function user(){
+        return $this->fetch("/member/bill_user");
+    }
+    public function finance(){
+        return $this->fetch("/member/bill_finance");
+    }
+    public function teller(){
+        return $this->fetch("/member/bill_teller");
     }
     public function create(Request $request){
 
