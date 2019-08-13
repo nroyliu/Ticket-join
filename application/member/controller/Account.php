@@ -5,11 +5,12 @@ namespace app\member\controller;
 
 
 use think\Controller;
+use think\Session;
 
-class account extends Controller
+class account extends Base
 {
     public function index(){
-        $this->assign("page","/member/bill/finance.html");
+        $user = Session::get('Bill_Auth');
         return $this->fetch("/member/index");
     }
 }

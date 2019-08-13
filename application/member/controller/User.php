@@ -17,7 +17,7 @@ class User extends Controller
             $map['password'] = ["=",md5(trim($request->param('password')))];
             $user = \app\model\User::where($map)->find();
             if (!is_null($user)){
-                Session::set("Cipan_Auth",$user);
+                Session::set("Bill_Auth",$user);
                 return json_encode(["status" => 1, "messages" => "登录成功"],JSON_UNESCAPED_UNICODE);
             }else{
                 return json_encode(["status" => 0, "messages" => "账号或密码错误"],JSON_UNESCAPED_UNICODE);
