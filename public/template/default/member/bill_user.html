@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cable-member</title>
+    <link rel="stylesheet" href="/{$Think.Config.template.view_path}assets/css/antd.min.css">
+    <link rel="stylesheet" href="/{$Think.Config.template.view_path}assets/css/bill.css">
+    <script src="/{$Think.Config.template.view_path}assets/js/vue.js"></script>
+    <script src="/{$Think.Config.template.view_path}assets/js/axios.min.js"></script>
+    <script src="/{$Think.Config.template.view_path}assets/js/moment.js"></script>
+    <script src="/{$Think.Config.template.view_path}assets/js/antd.min.js"></script>
+    <style type="text/css">
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div id="bill" v-cloak>
+    <a-layout>
+        <a-row>
+            <a-col class="left" :span="4">
+                <div class="sort-item" v-on:click="all">
+                    <p>全部</p>
+                </div>
+<!--                <div class="sort-item">-->
+<!--                    <p>已接收</p>-->
+<!--                </div>-->
+            </a-col>
+<!--                middle-->
+            <a-col class="middle" :span="8">
+                <a-spin :spinning="spinning.middle">
+                    <div class="spin-content">
+                        <div class="bill-list">
+                            <div class="bill-container">
+                                <div class="bill-head">
+                                    <p><a-icon type="appstore"></a-icon>票据
+                                        <a-button v-if="userinfo.ident === 1||userinfo.ident === 2" icon="plus" size="small" @click="showDrawer" class="new-bill">创建</a-button>
+                                    </p>
+
+                                </div>
+                                <a-skeleton :loading="loading.middle" :paragraph="{rows: 2}" v-for="i in 4" v-bind:key="i"></a-skeleton>
+                                <a-skeleton :loading="loading.middle" :paragraph="{rows: 2}">
+                                    <a-list item-layout="horizontal" :data-source="cost">
+                                        <a-list-item slot="renderItem" slot-scope="item, index" v-on:click="showTicket(item.id)" class="bill-item" v-bind:class="{active:item.id==isActive}">
+                                            <span>{{item.create_time}}</span>
+                                            <a-list-item-meta :description="item.bid">
+                                                <div slot="title" href="#">
+                                                    {{item.title}}
+                                                    <template  v-if="userinfo.ident === 1">
+                                                        <a-tag class="ant-tag-gold" v-if="item.status === 1">未收</a-tag>
+                                                        <a-tag color="blue" v-else-if="item.status === 2">待支付</a-tag>
+                                                        <a-tag color="green" v-else-if="item.status === 3">已支付</a-tag>
+                                                        <a-tag color="red" v-else-if="item.status === 4">拒支付</a-tag>
+                                                    </template>
+
+                                                    <template  v-else-if="userinfo.ident === 2">
+                                                        <a-tag class="ant-tag-gold" v-if="item.status === 1">未收</a-tag>
+                                                        <a-tag color="blue" v-else-if="item.status === 2">已收</a-tag>
+                                                    </template>
+
+                                                    <template  v-else-if="userinfo.ident === 3">
+                                                        <a-tag color="blue" v-if="item.status === 2">待支付</a-tag>
+                                                        <a-tag color="green" v-else-if="item.status === 3">已支付</a-tag>
+                                                        <a-tag color="red" v-else-if="item.status === 4">拒支付</a-tag>
+                                                    </template>
+                                                </div>
+                                            </a-list-item-meta>
+                                        </a-list-item>
+                                    </a-list>
+                                </a-skeleton>
+                            </div>
+                        </div>
+                    </div>
+                </a-spin>
+            </a-col>
+
+<!--            right bill in detail-->
+
+            <a-col class="right" :span="12">
+                <a-spin :spinning="spinning.right">
+                    <div class="spin-content">
+                        <a-skeleton :loading="loading.right" :paragraph="{rows: 13}" style="padding: 0 20px 25px;">
+                            <div class="bill-info">
+                                <div class="bill-info-container">
+                                    <span class="title">{{Ticketdata.ticket.title}}</span>
+                                    <template  v-if="userinfo.ident === 1">
+                                        <a-tag class="ant-tag-gold" v-if="Ticketdata.ticket.status === 1">未收</a-tag>
+                                        <a-tag color="blue" v-else-if="Ticketdata.ticket.status === 2">待支付</a-tag>
+                                        <a-tag color="green" v-else-if="Ticketdata.ticket.status === 3">已支付</a-tag>
+                                        <a-tag color="red" v-else-if="Ticketdata.ticket.status === 4">拒支付</a-tag>
+                                    </template>
+
+                                    <template  v-else-if="userinfo.ident === 2">
+                                        <a-tag class="ant-tag-gold" v-if="Ticketdata.ticket.status === 1">未收</a-tag>
+                                        <a-tag color="blue" v-else-if="Ticketdata.ticket.status === 2">已收</a-tag>
+                                    </template>
+
+                                    <template  v-else-if="userinfo.ident === 3">
+                                        <a-tag color="blue" v-if="Ticketdata.ticket.status === 2">待支付</a-tag>
+                                        <a-tag color="green" v-else-if="Ticketdata.ticket.status === 3">已支付</a-tag>
+                                        <a-tag color="red" v-else-if="Ticketdata.ticket.status === 4">拒支付</a-tag>
+                                    </template>
+                                    <div class="operatoin">
+                                        <a-button v-if="userinfo.ident === 3" @click="nopay(Ticketdata.ticket.id)">拒支</a-button>
+                                        <a-button v-if="userinfo.ident === 3" type="primary" @click="accept(Ticketdata.ticket.id)">支付</a-button>
+                                        <a-button v-if="userinfo.ident === 2" type="primary" @click="accept(Ticketdata.ticket.id)">接收</a-button>
+                                    </div>
+                                    <div class="head-content">
+                                        <a-col class="details" :span="14">
+                                            <a-col :span="12">
+                                                <div class="term">创建人</div>
+                                                <div class="detail">{{Ticketdata.ticket.user}}</div>
+                                            </a-col>
+                                            <a-col :span="12">
+                                                <div class="term">类型</div>
+                                                <div v-if="Ticketdata.ticket.type === 0" class="detail">非业务</div>
+                                                <div v-else-if="Ticketdata.ticket.type === 1" class="detail">业务</div>
+                                            </a-col>
+                                            <a-col :span="12">
+                                                <div class="term">系统编号</div>
+                                                <div class="detail">{{Ticketdata.ticket.bid}}</div>
+                                            </a-col>
+                                            <a-col :span="12">
+                                                <div class="term">创建日期</div>
+                                                <div class="detail">{{Ticketdata.ticket.create_time}}</div>
+                                            </a-col>
+                                            <a-col :span="12">
+                                                <div class="term">业务编号</div>
+                                                <div class="detail">{{Ticketdata.ticket.bill_id}}</div>
+                                            </a-col>
+                                            <a-col :span="12">
+                                                <div class="term">票据日期</div>
+                                                <div class="detail">{{Ticketdata.ticket.bill_time}}</div>
+                                            </a-col>
+                                            <a-col :span="24">
+                                                <div class="term" style="width: 50px">备注</div>
+                                                <div class="detail">{{Ticketdata.ticket.description}}</div>
+                                            </a-col>
+                                        </a-col>
+
+
+                                        <a-col class="detail-money" :span="10">
+                                            <a-col class="statistic" :span="8">
+                                                <div class="mony-title">收支类型</div>
+                                                <div v-if="Ticketdata.ticket.money_type === 0" class="mony-content">支出</div>
+                                                <div v-else-if="Ticketdata.ticket.money_type === 1" class="mony-content">收入</div>
+                                            </a-col>
+                                            <a-col class="statistic" :span="16">
+                                                <div class="mony-title">金额</div>
+                                                <div class="mony-content">￥{{Ticketdata.ticket.money}}</div>
+                                            </a-col>
+                                        </a-col>
+                                    </div>
+                                    <div class="body-content">
+                                        <a-timeline>
+                                            <a-timeline-item v-for="log in Ticketdata.logs"><span style="color: dodgerblue">{{log.user}}</span> {{log.log}} {{log.create_time}}</a-timeline-item>
+                                        </a-timeline>
+                                    </div>
+                                    <div class="detail-file-container">
+                                        <a-col class="detail-file" v-for="item in Ticketdata.files">
+                                            <div class="ico-file">
+                                                <a-icon v-if="item.type === 'pdf'" type="file-pdf" ></a-icon>
+                                                    <a-icon v-else-if="item.type === 'doc'" type="file-word" ></a-icon>
+                                                    <a-icon v-else-if="item.type === 'docx'" type="file-word" ></a-icon>
+                                                    <a-icon v-else-if="item.type === 'ppt'" type="file-ppt" ></a-icon>
+                                                    <a-icon v-else-if="item.type === 'pptx'" type="file-ppt" ></a-icon>
+                                                    <a-icon v-else-if="item.type === 'xls'" type="file-excel" ></a-icon>
+                                                    <a-icon v-else-if="item.type === 'xlsx'" type="file-excel" ></a-icon>
+                                                    <a-icon v-else-if="item.type === 'txt'" type="file-text" ></a-icon>
+                                                    <a-icon v-else-if="item.type === 'jpg'" type="picture" ></a-icon>
+                                                    <a-icon v-else-if="item.type === 'jpeg'" type="picture" ></a-icon>
+                                                    <a-icon v-else-if="item.type === 'png'" type="picture" ></a-icon>
+                                                    <a-icon v-else-if="item.type === 'bmp'" type="picture" ></a-icon>
+                                                    <a-icon v-else type="file" ></a-icon>
+                                            </div>
+                                            <div class="file-info">
+                                                <h5>{{item.filename}}</h5>
+                                                <p><a :href="'/uploads/' + item.filepath" target="_blank">Download</a></p>
+                                            </div>
+                                        </a-col>
+                                    </div>
+                                </div>
+                            </div>
+                        </a-skeleton>
+                    </div>
+            </a-spin>
+            </a-col>
+        </a-row>
+
+<!--        new-->
+
+        <a-drawer title="创建新票据" :width="720" @close="onClose" :visible="visible" :wrap-style="{height: 'calc(100% - 108px)',overflow: 'auto',paddingBottom: '108px'}">
+            <a-form :form="form.createBill" layout="vertical" hide-required-mark>
+                <a-row :gutter="16">
+                    <a-col :span="6">
+                        <a-form-item label="收支类型">
+                            <a-radio-group button-style="solid" v-decorator="['money_type', {rules: [{ required: true, message: '请选择收支类型' }]}]">
+                                <a-radio-button value="0">支出</a-radio-button>
+                                <a-radio-button value="1">收入</a-radio-button>
+                            </a-radio-group>
+                        </a-form-item>
+                    </a-col>
+                    <a-col :span="6">
+                        <a-form-item label="金额">
+                            <a-input v-decorator="['money', {rules: [{ required: true, message: '请输入金额' }]}]" placeholder="输入金额" type="number"/>
+                        </a-form-item>
+                    </a-col>
+                </a-row>
+                <a-row :gutter="16">
+                    <a-col :span="12">
+                        <a-form-item label="票据名称">
+                            <a-input v-decorator="['title', {rules: [{ required: true, message: '请输入票据名称' }]}]" placeholder="输入票据名称"/>
+                        </a-form-item>
+                    </a-col>
+                </a-row>
+                <a-row :gutter="16">
+                    <a-col :span="12">
+                        <a-form-item label="业务类型">
+                            <a-select v-decorator ="['type', {rules: [{ required: true, message: '请选择业务类型' }]}]" placeholder="选择业务类型">
+                                <a-select-option value="0">非业务</a-select-option>
+                                <a-select-option value="1">业务</a-select-option>
+                            </a-select>
+                        </a-form-item>
+                    </a-col>
+                </a-row>
+                <a-row :gutter="16">
+                    <a-col :span="12">
+                        <a-form-item label="票据单号">
+                            <a-input v-decorator="['bill_id', {rules: [{ required: true, message: '请输入票据单号' }]}]" placeholder="输入票据单号"/>
+                        </a-form-item>
+                    </a-col>
+                </a-row>
+                <a-row :gutter="16">
+                    <a-col :span="12">
+                        <a-form-item label="票据日期">
+                            <a-date-picker v-decorator="['bill_time', {rules: [{ required: true, message: '请选择票据日期', }]}]" style="width: 100%" placeholder="请选择票据日期" />
+                        </a-form-item>
+                    </a-col>
+                </a-row>
+                <a-row :gutter="16">
+                    <a-col :span="24">
+                        <a-form-item label="备注">
+                            <a-textarea v-decorator="['description', {rules: [{ required: true, message: '输入备注信息' }]}]" :rows="4" placeholder="输入备注信息"/>
+                        </a-form-item>
+                    </a-col>
+                </a-row>
+                <a-row :gutter="16">
+                    <a-col :span="24">
+                        <a-form-item label="上传文件" extra="">
+                            <a-upload v-decorator="['upload', {valuePropName: 'fileList',getValueFromEvent: normFile,}]" name="file" action="/member/upload/file" list-type="text">
+                                <a-button>
+                                    <a-icon type="upload"></a-icon> Click to upload
+                                </a-button>
+                            </a-upload>
+                        </a-form-item>
+                    </a-col>
+                </a-row>
+            </a-form>
+            <div :style="{position: 'absolute',left: 0,bottom: 0,width: '100%',borderTop: '1px solid #e9e9e9',padding: '10px 16px',background: '#fff',textAlign: 'right',}">
+                <a-button :style="{marginRight: '8px'}" @click="onClose">
+                    取消
+                </a-button>
+                <a-button @click="submitCreate" type="primary">提交</a-button>
+            </div>
+        </a-drawer>
+    </a-layout>
+
+</div>
+</body>
+<script src="/{$Think.Config.template.view_path}assets/js/bill_user.js"></script>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cable-member</title>
+    <script src="/{$Think.Config.template.view_path}assets/js/vue.js"></script>
+    <link rel="stylesheet" href="/{$Think.Config.template.view_path}assets/css/antd.min.css">
+    <script src="/{$Think.Config.template.view_path}assets/js/axios.min.js"></script>
+    <script src="/{$Think.Config.template.view_path}assets/js/antd.min.js"></script>
+    <style type="text/css">
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div id="app" v-cloak>
+    <div>
+        <a-menu mode="horizontal" v-model="nav.current">
+            <a-menu-item key="bill" @click="switch_page('messages')" style="border-right: 1px solid #eee;">
+                <a-icon type="snippets"/></a-icon>票据
+            </a-menu-item>
+            <a-menu-item key="logout" @click="logout" style="border-right: 1px solid #eee;">
+                <a-icon type="export"/></a-icon>退出登录
+            </a-menu-item>
+        </a-menu>
+    </div>
+
+    <iframe class="main-iframe" :src="page" width="100%"></iframe>
+</div>
+</body>
+<script>
+    var app = new Vue({
+        el: "#app",
+        data() {
+            return {
+                page:"/member/bill/user",
+                nav:{
+                    current: ['bill']
+                },
+            }
+        },
+        //初始化
+        mounted() {
+            this.openNotification()
+        },
+        //方法
+        methods: {
+            openNotification () {
+                this.$notification.open({
+                    message: '欢迎回来！',
+                    description: '{$Think.Session.Bill_Auth.username}',
+                    icon: '',
+
+            });
+            },
+            logout(){
+                axios.post("/member/user/logout").then(function (response) {
+                    window.location.href = "/";
+                })
+            }
+        },
+    })
+</script>
+<style>
+    body{
+        overflow: hidden;
+    }
+    .main-iframe {
+        border: 0;
+        padding: 0;
+        margin: 0;
+        height: calc(100vh - 46px);
+        overflow: hidden;
+    }
+</style>
+</html>
