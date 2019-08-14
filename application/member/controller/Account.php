@@ -13,4 +13,14 @@ class account extends Base
         $user = Session::get('Bill_Auth');
         return $this->fetch("/member/index");
     }
+    public function getUserInfo(){
+        $user = Session::get("Bill_Auth");
+        $data = [
+            "id" => $user->id,
+            "username" => $user->username,
+            "ident" => $user->ident,
+            "status" => $user->status,
+        ];
+        return json_encode($data);
+    }
 }

@@ -25,4 +25,7 @@ class User extends Controller
         }
 
     }
+    public function logout(){
+        Session::set("Bill_Auth",null);
+    }
 }

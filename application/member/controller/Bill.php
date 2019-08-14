@@ -16,12 +16,6 @@ class Bill extends Controller
     public function user(){
         return $this->fetch("/member/bill_user");
     }
-    public function finance(){
-        return $this->fetch("/member/bill_finance");
-    }
-    public function teller(){
-        return $this->fetch("/member/bill_teller");
-    }
     public function create(Request $request){
         if ($request->isPost()){
             $data = $request->param();
@@ -47,7 +41,7 @@ class Bill extends Controller
                 $log = Log::create([
                     "bid" => $bid,
                     "user" => $data['user'],
-                    "log" => "创建于",
+                    "log" => "创建",
                     "create_time" => $createTime,
                 ]);
                 return json_encode([
@@ -61,7 +55,16 @@ class Bill extends Controller
         if ($request->isPost()){
             $user = Session::get("Bill_Auth");
             $username = $user->username;
-            $Ticket = \app\model\Bill::where('user','=',$username)->order("create_time","desc")->select();
+            if ($user->ident == 1){
+                $param = "1,2,3,4";
+                $Ticket = \app\model\Bill::where('user','=',$username)->where("status","in",$param)->order("create_time","desc")->select();
+            }elseif ($user->ident == 2){
+                $param = "1,2";
+                $Ticket = \app\model\Bill::where("status","in",$param)->order("create_time","desc")->select();
+            }elseif ($user->ident == 3){
+                $param = "2,3,4";
+                $Ticket = \app\model\Bill::where("status","in",$param)->order("create_time","desc")->select();
+            }
             if ($Ticket){
                 return $Ticket->toJson();
             }
@@ -80,6 +83,70 @@ class Bill extends Controller
                     "logs" => $logs
                 ]);
             }
+        }
+    }
+    public function accept(Request $request){
+        if ($request->isPost()){
+            $bid = $request->param("id");
+            $user = Session::get('Bill_Auth');
+            $bill = \app\model\Bill::where("id","=",$bid)->find();
+            if ($bill){
+                if ($user->ident == 2){
+                    if ($bill->status == 1){
+                        $log = Log::create([
+                            "bid" => $bid,
+                            "user" => $user->username,
+                            "log" => "已接收"
+                        ]);
+                        if ($log){
+                            $bill->status = 2;
+                            if ($bill->save()){
+                                return json_encode(["status" => 1, "message" => "接收成功"]);
+                            }
+                        }
+                    }
+                }elseif ($user->ident == 3){
+                    if ($bill->status == 2){
+                        $log = Log::create([
+                            "bid" => $bid,
+                            "user" => $user->username,
+                            "log" => "已支付"
+                        ]);
+                        if ($log){
+                            $bill->status = 3;
+                            if ($bill->save()){
+                                return json_encode(["status" => 1, "message" => "支付成功"]);
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+    public function nopay(Request $request){
+        if ($request->isPost()){
+            $bid = $request->param("id");
+            $user = Session::get('Bill_Auth');
+            $bill = \app\model\Bill::where("id","=",$bid)->find();
+            if ($bill){
+                if ($user->ident == 3){
+                    if ($bill->status == 2){
+                        $log = Log::create([
+                            "bid" => $bid,
+                            "user" => $user->username,
+                            "log" => "拒支"
+                        ]);
+                        if ($log){
+                            $bill->status = 4;
+                            if ($bill->save()){
+                                return json_encode(["status" => 1, "message" => "拒支成功"]);
+                            }
+                        }
+                    }
+                }
+            }
+
         }
     }
     
