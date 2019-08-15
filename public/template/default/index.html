@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cable-login</title>
+    <title>云雀-登录</title>
     <script src="{$Think.Config.template.view_path}assets/js/vue.js"></script>
     <link rel="stylesheet" href="{$Think.Config.template.view_path}assets/css/antd.min.css">
     <script src="{$Think.Config.template.view_path}assets/js/axios.min.js"></script>
@@ -12,8 +12,8 @@
  <div id="app">
      <div class="login-card">
          <div align="middle">
-             <h1>log in Cable</h1>
-             <p>welcome</p>
+             <h1>云雀-登录</h1>
+             <p>🛫</p>
          </div>
          <a-form :form="form" @submit="handleSubmit">
              <a-form-item label="" :label-col="{span: 5}" :wrapper-col="{ span: 24 }" :validate-status="email_valid" :help="valid_text">
@@ -34,62 +34,7 @@
 
  </div>
 </body>
-<script>
-    var app = new Vue({
-        el: "#app",
-        data() {
-            return {
-                login_status: 0,
-                form: null,
-                email_valid: null,
-                valid_text: null
-            }
-        },
-        //初始化
-        mounted() {
-            this.form = this.$form.createForm(this);
-        },
-        //方法
-        methods: {
-            handleSubmit(e) {
-                e.preventDefault();
-                //错误验证
-                this.form.validateFields((err, values) => {
-                    console.log(values);
-                    if (!err) { //无填写错误
-                        this.email_valid = 'validating';
-                        var formData = new FormData();
-                        formData.append('username', values['username']);
-                        formData.append('password', values['password']);
-                        console.log(formData);
-                        axios.post('/member/user/login', {
-                            'username': values['username'],
-                            'password': values['password']
-                        })
-                            .then(function (response) {
-                                console.log(response.data.status);
-                                if (response.data.status == 1) {
-                                    app.email_valid = 'success';
-                                    app.valid_text = null;
-                                    window.location.href = '/member/account';
-                                } else {
-                                    console.log("登录失败");
-                                    app.email_valid = 'error';
-                                    app.valid_text = response.data.messages;
-                                }
-                            })
-                            .catch(function (error) {
-                                console.log(error);
-                            });
-                    } else {
-                        this.email_valid = 'warning';
-                        this.valid_text = 'Incorrect email or password';
-                    }
-                });
-            },
-        },
-    })
-</script>
+<script src="{$Think.Config.template.view_path}assets/js/login.js"></script>
 <style>
     .login-card {
         padding: 50px;

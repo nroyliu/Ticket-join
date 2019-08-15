@@ -68,6 +68,9 @@ class Bill extends Controller
             }elseif ($user->ident == 3){
                 $param = "2,3,4";
                 $Ticket = \app\model\Bill::where("status","in",$param)->order("create_time","desc")->select();
+            }elseif ($user->ident == 0){
+                $param = "1,2,3,4,5";
+                $Ticket = \app\model\Bill::where("status","in",$param)->order("create_time","desc")->select();
             }
             if ($Ticket){
                 return $Ticket->toJson();

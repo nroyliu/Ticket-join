@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cable-member</title>
+    <title>云雀-用户中心</title>
     <link rel="stylesheet" href="/{$Think.Config.template.view_path}assets/css/antd.min.css">
     <link rel="stylesheet" href="/{$Think.Config.template.view_path}assets/css/bill.css">
     <script src="/{$Think.Config.template.view_path}assets/js/vue.js"></script>
@@ -47,7 +47,7 @@
                                             <a-list-item-meta :description="item.bid">
                                                 <div slot="title" href="#">
                                                     {{item.title}}
-                                                    <template  v-if="userinfo.ident === 1">
+                                                    <template  v-if="userinfo.ident === 1||userinfo.ident === 0">
                                                         <a-tag class="ant-tag-gold" v-if="item.status === 1">未收</a-tag>
                                                         <a-tag color="blue" v-else-if="item.status === 2">待支付</a-tag>
                                                         <a-tag color="green" v-else-if="item.status === 3">已支付</a-tag>
@@ -86,7 +86,7 @@
                             <div class="bill-info">
                                 <div class="bill-info-container">
                                     <span class="title">{{Ticketdata.ticket.title}}</span>
-                                    <template  v-if="userinfo.ident === 1">
+                                    <template  v-if="userinfo.ident === 1||userinfo.ident === 0">
                                         <a-tag class="ant-tag-gold" v-if="Ticketdata.ticket.status === 1">未收</a-tag>
                                         <a-tag color="blue" v-else-if="Ticketdata.ticket.status === 2">待支付</a-tag>
                                         <a-tag color="green" v-else-if="Ticketdata.ticket.status === 3">已支付</a-tag>
