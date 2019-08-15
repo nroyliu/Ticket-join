@@ -17,13 +17,20 @@ class account extends Base
     }
     public function getUserInfo(){
         $user = Session::get("Bill_Auth");
-        $loginLog = LoginLog::where("user", "=", $user->username)->order("time","desc")->find();
+        $loginLog = LoginLog::where("user", "=", $user->username)->order("time","desc")->select();
+        if ($loginLog->count()>1){
+            $log = $loginLog->toArray()[0];
+        }else{
+            $log = [
+                "time" => "-"
+            ];
+        }
         $data = [
             "id" => $user->id,
             "username" => $user->username,
             "ident" => $user->ident,
             "status" => $user->status,
-            "log" => $loginLog->toArray(),
+            "log" => $log,
         ];
         return json_encode($data);
     }
