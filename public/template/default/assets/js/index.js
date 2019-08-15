@@ -70,8 +70,6 @@ var app = new Vue({
                 app.$notification.open({
                     message: '欢迎回来！',
                     description: app.userinfo.username,
-                    icon: '',
-
                 });
             })
         },
