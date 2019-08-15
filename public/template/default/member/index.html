@@ -20,6 +20,9 @@
             <a-menu-item key="bill" @click="switch_page('messages')" style="border-right: 1px solid #eee;">
                 <a-icon type="snippets"/></a-icon>票据
             </a-menu-item>
+            <a-menu-item key="changepwd" @click="showModal" style="border-right: 1px solid #eee;">
+                <a-icon type="key"/></a-icon>修改密码
+            </a-menu-item>
             <a-menu-item key="logout" @click="logout" style="border-right: 1px solid #eee;">
                 <a-icon type="export"/></a-icon>退出登录
             </a-menu-item>
@@ -27,41 +30,24 @@
     </div>
 
     <iframe class="main-iframe" :src="page" width="100%"></iframe>
+
+
+    <a-modal :visible="changepwd.visible" title='修改密码' cancel-text="取消" ok-text='确定' @cancel="handleCancel" @ok="handleCreate">
+        <a-form layout='vertical' :form="form.changepwd">
+            <a-form-item label='原密码'>
+                <a-input type='password' v-decorator="['oldpassword', {rules: [{ required: true, message: '输入原密码' }]}]" placeholder="输入原密码"/>
+            </a-form-item>
+            <a-form-item label='新密码'>
+                <a-input type='password' v-decorator="['password', {rules: [{ required: true, message: '输入新密码' }, {validator: validateToNextPassword,}]}]" placeholder="输入新密码"/>
+            </a-form-item>
+            <a-form-item label='确认密码'>
+                <a-input type='password' v-decorator="['confirm', {rules: [{ required: true, message: '请确认密码' }, {validator: compareToFirstPassword,}]}]" placeholder="确认密码" @blur="handleConfirmBlur"/>
+            </a-form-item>
+        </a-form>
+    </a-modal>
 </div>
 </body>
-<script>
-    var app = new Vue({
-        el: "#app",
-        data() {
-            return {
-                page:"/member/bill/user",
-                nav:{
-                    current: ['bill']
-                },
-            }
-        },
-        //初始化
-        mounted() {
-            this.openNotification()
-        },
-        //方法
-        methods: {
-            openNotification () {
-                this.$notification.open({
-                    message: '欢迎回来！',
-                    description: '{$Think.Session.Bill_Auth.username}',
-                    icon: '',
-
-            });
-            },
-            logout(){
-                axios.post("/member/user/logout").then(function (response) {
-                    window.location.href = "/";
-                })
-            }
-        },
-    })
-</script>
+<script src="/{$Think.Config.template.view_path}assets/js/index.js"></script>
 <style>
     body{
         overflow: hidden;

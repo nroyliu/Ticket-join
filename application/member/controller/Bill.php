@@ -6,6 +6,7 @@ namespace app\member\controller;
 
 use app\model\Log;
 use app\model\Uploadfile;
+use think\Console;
 use think\Controller;
 use think\Db;
 use think\Request;
@@ -21,7 +22,10 @@ class Bill extends Controller
             $data = $request->param();
             $order = Db::query("call GetSerialNo('bill_serialize',@result)");
             $data['bid'] = $order[0][0]['result'];
-            $data['user'] = Session::get('Bill_Auth')['username'];
+            $user = Session::get('Bill_Auth')['username'];
+            if (!isset($data['user'])){
+                $data['user'] = $user;
+            }
             $data['bill_time'] = date("Y-m-d",strtotime($data['bill_time']));
             $billModel = new \app\model\Bill($data);
             $result = $billModel->allowField(['bid','bill_id','user','title','description','money_type','money','bill_time','type'])->save();
@@ -40,7 +44,7 @@ class Bill extends Controller
             if ($result){
                 $log = Log::create([
                     "bid" => $bid,
-                    "user" => $data['user'],
+                    "user" => $user,
                     "log" => "创建",
                     "create_time" => $createTime,
                 ]);
@@ -56,10 +60,10 @@ class Bill extends Controller
             $user = Session::get("Bill_Auth");
             $username = $user->username;
             if ($user->ident == 1){
-                $param = "1,2,3,4";
+                $param = "1,2,3,4,5";
                 $Ticket = \app\model\Bill::where('user','=',$username)->where("status","in",$param)->order("create_time","desc")->select();
             }elseif ($user->ident == 2){
-                $param = "1,2";
+                $param = "1,2,3,4,5";
                 $Ticket = \app\model\Bill::where("status","in",$param)->order("create_time","desc")->select();
             }elseif ($user->ident == 3){
                 $param = "2,3,4";
@@ -124,9 +128,10 @@ class Bill extends Controller
 
         }
     }
-    public function nopay(Request $request){
+    public function noaccept(Request $request){
         if ($request->isPost()){
             $bid = $request->param("id");
+            $comment = $request->param("comment");
             $user = Session::get('Bill_Auth');
             $bill = \app\model\Bill::where("id","=",$bid)->find();
             if ($bill){
@@ -135,12 +140,29 @@ class Bill extends Controller
                         $log = Log::create([
                             "bid" => $bid,
                             "user" => $user->username,
-                            "log" => "拒支"
+                            "log" => "拒支",
+                            "comment" => $comment
                         ]);
                         if ($log){
                             $bill->status = 4;
                             if ($bill->save()){
                                 return json_encode(["status" => 1, "message" => "拒支成功"]);
+                            }
+                        }
+                    }
+                }
+                if ($user->ident == 2){
+                    if ($bill->status == 1){
+                        $log = Log::create([
+                            "bid" => $bid,
+                            "user" => $user->username,
+                            "log" => "拒收",
+                            "comment" => $comment
+                        ]);
+                        if ($log){
+                            $bill->status = 5;
+                            if ($bill->save()){
+                                return json_encode(["status" => 1, "message" => "拒收成功"]);
                             }
                         }
                     }

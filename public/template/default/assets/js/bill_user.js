@@ -3,7 +3,8 @@ var bill = new Vue({
         data() {
             return {
                 form: {
-                    createBill: this.$form.createForm(this)
+                    createBill: this.$form.createForm(this),
+                    dig: this.$form.createForm(this)
                 },
                 current: ['mail'],
                 cost:[],
@@ -39,6 +40,9 @@ var bill = new Vue({
                 showLoadingMore: false,
                 visible: false,
                 isActive: 0,
+                dig:{
+                    visible: false,
+                }
             }
         },
         //初始化
@@ -103,13 +107,22 @@ var bill = new Vue({
                                 bill.$message.error("添加失败");
                             }
                         });
-                        // than.loading.middle = true,
-                        // than.spinning.middle = !than.spinning.middle;
-                        // setTimeout(function(){
-                        //     than.cost.unshift(values)
-                        //     than.loading.middle = false,
-                        //     than.spinning.middle = !than.spinning.middle;
-                        // },500);
+                    }
+                });
+            },
+            showModal () {
+                this.dig.visible = true;
+            },
+            handleCancel  () {
+                this.dig.visible = false;
+            },
+            handleCreate  () {
+                this.form.dig.validateFields((err, values) => {
+                    if (!err) {
+                        var id = bill.Ticketdata.ticket.id;
+                        var result = bill.noaccept(id,values.comment);
+                        bill.form.dig.resetFields();
+                        bill.dig.visible = false;
                     }
                 });
             },
@@ -118,18 +131,21 @@ var bill = new Vue({
                     if (response.data.status == 1){
                         bill.$message.success(response.data.message);
                         bill.showTicket(id);
+                        bill.all();
                     }else {
                         bill.$message.error("处理失败");
                     }
                 })
             },
-            nopay(id){
-                axios.post("/member/bill/nopay",{"id": id}).then(function (response) {
+            noaccept(id,comment){
+                axios.post("/member/bill/noaccept",{"id": id,"comment": comment}).then(function (response) {
                     if (response.data.status == 1){
                         bill.$message.success(response.data.message);
                         bill.showTicket(id);
+                        bill.all();
                     }else {
                         bill.$message.error("拒支失败");
+                        return false;
                     }
                 })
             },

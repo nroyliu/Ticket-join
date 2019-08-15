@@ -6,6 +6,7 @@ namespace app\member\controller;
 
 use app\model\Uploadfile;
 use think\Request;
+use think\Session;
 
 class Upload extends Base
 {
@@ -15,6 +16,8 @@ class Upload extends Base
             $info = $file->validate(["ext" => "jpg,png,gif,jpeg,zip,rar,bmp,txt,doc,docx,ppt,pptx,xlsx,xls"])->move(ROOT_PATH . "public" . DS . "uploads");
             if ($info){
                 $data = array();
+                $user = Session::get('Bill_Auth');
+                $data['user'] = $user->username;
                 $data['filename'] = $info->getInfo('name');
                 $data['type'] = $info->getExtension();
                 $data['filepath'] = $info->getSaveName();
