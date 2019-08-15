@@ -68,8 +68,8 @@ var app = new Vue({
             axios.post("/member/account/getUserInfo").then(function (response) {
                 app.userinfo = response.data;
                 app.$notification.open({
-                    message: '欢迎回来！',
-                    description: app.userinfo.username,
+                    message: app.userinfo.username + ' 欢迎回来！',
+                    description: "上次登陆时间：" + app.userinfo.log.time,
                 });
             })
         },

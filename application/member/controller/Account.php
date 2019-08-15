@@ -4,6 +4,7 @@
 namespace app\member\controller;
 
 
+use app\model\LoginLog;
 use think\Controller;
 use think\Request;
 use think\Session;
@@ -16,11 +17,13 @@ class account extends Base
     }
     public function getUserInfo(){
         $user = Session::get("Bill_Auth");
+        $loginLog = LoginLog::where("user", "=", $user->username)->order("time","desc")->find();
         $data = [
             "id" => $user->id,
             "username" => $user->username,
             "ident" => $user->ident,
             "status" => $user->status,
+            "log" => $loginLog->toArray(),
         ];
         return json_encode($data);
     }
